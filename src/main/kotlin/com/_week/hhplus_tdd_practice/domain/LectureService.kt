@@ -3,6 +3,7 @@ package com._week.hhplus_tdd_practice.domain
 import com._week.hhplus_tdd_practice.infra.entity.Lecture
 import com._week.hhplus_tdd_practice.infra.LectureRepository
 import org.springframework.stereotype.Service
+import java.time.LocalDateTime
 
 @Service
 class LectureService(
@@ -19,6 +20,10 @@ class LectureService(
         }
 
         return lecture
+    }
+
+    fun getUpcomingLecture(now: LocalDateTime): List<Lecture> {
+        return lectureRepository.findByDateAfter(now)
     }
 
 }

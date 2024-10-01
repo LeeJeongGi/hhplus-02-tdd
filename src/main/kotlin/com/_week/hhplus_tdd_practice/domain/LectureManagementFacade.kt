@@ -1,29 +1,48 @@
 package com._week.hhplus_tdd_practice.domain
 
 import com._week.hhplus_tdd_practice.domain.dto.LectureHistoryDto
+import com._week.hhplus_tdd_practice.domain.dto.LectureHistoryInfo
 import com._week.hhplus_tdd_practice.domain.dto.LectureInfo
 import com._week.hhplus_tdd_practice.domain.dto.UserLectureDto
 import org.springframework.stereotype.Service
 import org.springframework.transaction.annotation.Transactional
+import java.time.LocalDateTime
+import java.time.temporal.ChronoUnit
 
 @Service
 class LectureManagementFacade(
     private val lectureService: LectureService,
     private val lectureEnrollmentService: LectureEnrollmentService,
 ) {
-    @Transactional(readOnly = true)
-    fun enroll(request: UserLectureDto): LectureInfo {
+
+    @Transactional(readOnly = false)
+    fun enroll(request: UserLectureDto): LectureHistoryInfo {
         // 1. 해당 특강에 신청 이력이 있는지 검증
-        lectureEnrollmentService.checkUserEnrollment(request)
+        if (!lectureEnrollmentService.checkUserEnrollment(request)) {
+            throw IllegalArgumentException("동일한 유저는 동일 특강에 대해 한 번만 신청할 수 있습니다.")
+        }
 
         // 2. 유효한 강좌인지 검증
         val lecture = lectureService.findLecture(request.lectureId)
 
         // 3. 특강 신청자가 30명 넘었는지 검증
-        lectureEnrollmentService.checkLectureCapacity(request.lectureId)
+        if (!lectureEnrollmentService.checkLectureCapacity(request.lectureId)) {
+            throw IllegalArgumentException("신청 인원이 30명을 초과할 수 없습니다.")
+        }
 
         // 4. 신청
         lectureEnrollmentService.enroll(LectureHistoryDto.of(lecture, request.userId))
-        return LectureInfo.of(lecture, request.userId)
+        return LectureHistoryInfo.of(lecture, request.userId)
+    }
+
+    @Transactional(readOnly = true)
+    fun getLectures(): List<LectureInfo> {
+        val lectures = lectureService.getUpcomingLecture(LocalDateTime.now().truncatedTo(ChronoUnit.SECONDS))
+
+        return lectures.filter { lecture ->
+            lectureEnrollmentService.checkLectureCapacity(lecture.id!!)
+        }.map {
+            LectureInfo.of(it)
+        }
     }
 }
