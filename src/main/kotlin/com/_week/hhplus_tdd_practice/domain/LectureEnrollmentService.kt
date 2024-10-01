@@ -22,19 +22,13 @@ class LectureEnrollmentService(
         return lectureEnrollmentRepository.save(lectureEnrollmentHistory)
     }
 
-    fun checkUserEnrollment(userLectureDto: UserLectureDto) {
+    fun checkUserEnrollment(userLectureDto: UserLectureDto): Boolean {
         val enrollment = lectureEnrollmentRepository.findByUserIdAndLectureId(userLectureDto.userId, userLectureDto.lectureId)
-
-        if (enrollment != null) {
-            throw IllegalArgumentException("동일한 유저는 동일 특강에 대해 한 번만 신청할 수 있습니다.")
-        }
+        return enrollment == null
     }
 
-    fun checkLectureCapacity(lectureId: Long) {
+    fun checkLectureCapacity(lectureId: Long): Boolean {
         val currentEnrollmentCount = lectureEnrollmentRepository.countByLectureId(lectureId)
-
-        if (currentEnrollmentCount >= 30) {
-            throw IllegalArgumentException("신청 인원이 30명을 초과할 수 없습니다.")
-        }
+        return currentEnrollmentCount < 30
     }
 }

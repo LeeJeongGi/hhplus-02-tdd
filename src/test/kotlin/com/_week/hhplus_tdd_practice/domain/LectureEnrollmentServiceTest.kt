@@ -31,19 +31,18 @@ class LectureEnrollmentServiceTest {
     }
 
     @Test
-    @DisplayName("동일한 유저가 동일 특강에 신청할 경우 에러가 발생 한다.")
+    @DisplayName("동일한 유저가 동일 특강에 신청할 경우 에러(false)가 발생 한다.")
     fun checkUserEnrollmentException() {
         // given
         val userId = 1L
         val saveLecture = saveTestLecture()
         lectureEnrollmentService.enroll(LectureHistoryDto.of(saveLecture, userId))
 
-        // when & then
-        val message = assertThrows<IllegalArgumentException> {
-            lectureEnrollmentService.checkUserEnrollment(UserLectureDto.of(saveLecture.id!!, userId))
-        }.message
+        // when
+        val result = lectureEnrollmentService.checkUserEnrollment(UserLectureDto.of(saveLecture.id!!, userId))
 
-        assertThat(message).isEqualTo("동일한 유저는 동일 특강에 대해 한 번만 신청할 수 있습니다.")
+        // then
+        assertThat(result).isFalse()
     }
 
     @Test
@@ -61,7 +60,7 @@ class LectureEnrollmentServiceTest {
     }
 
     @Test
-    @DisplayName("특강 신청 회원 수는 30명을 넘을 수 없기 때문에 31번째 신청 했을 때 에러 발생 테스트")
+    @DisplayName("특강 신청 회원 수는 30명을 넘을 수 없기 때문에 31번째 신청 했을 때 에러 발생(false) 테스트")
     fun checkLectureCapacityException() {
         // given
         val userId = 1L
@@ -71,11 +70,10 @@ class LectureEnrollmentServiceTest {
         }
 
         // when & then
-        val message = assertThrows<IllegalArgumentException> {
-            lectureEnrollmentService.checkLectureCapacity(saveLecture.id!!)
-        }.message
+        val result = lectureEnrollmentService.checkLectureCapacity(saveLecture.id!!)
 
-        assertThat(message).isEqualTo("신청 인원이 30명을 초과할 수 없습니다.")
+        // then
+        assertThat(result).isFalse()
     }
 
     @Test
