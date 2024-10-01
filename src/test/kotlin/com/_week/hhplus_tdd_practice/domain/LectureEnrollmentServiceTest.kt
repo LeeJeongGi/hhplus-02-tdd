@@ -2,6 +2,7 @@ package com._week.hhplus_tdd_practice.domain
 
 import com._week.hhplus_tdd_practice.domain.dto.LectureHistoryDto
 import com._week.hhplus_tdd_practice.domain.dto.UserLectureDto
+import com._week.hhplus_tdd_practice.infra.LectureEnrollmentRepository
 import com._week.hhplus_tdd_practice.infra.entity.Lecture
 import com._week.hhplus_tdd_practice.infra.entity.LectureType
 import com._week.hhplus_tdd_practice.infra.LectureRepository
@@ -113,6 +114,48 @@ class LectureEnrollmentServiceTest {
         assertThat(lectureEnrollmentHistory.lecture.presenter).isEqualTo(saveLecture.presenter)
         assertThat(lectureEnrollmentHistory.lecture.capacity).isEqualTo(30L)
 
+    }
+
+    @Test
+    @DisplayName("특정 유저가 신청한 특강 목록을 가져오는 테스트")
+    fun getUserHistoryTest() {
+        // given
+        val userId = 1L
+        val lectures = listOf(
+            Lecture(
+                title = LectureType.Ai,
+                presenter = "Lee",
+                capacity = 30,
+                date = dateFormat("2025-09-30 13:00"),
+            ),
+            Lecture(
+                title = LectureType.FRONT_END,
+                presenter = "Kim",
+                capacity = 30,
+                date = dateFormat("2025-09-30 13:00"),
+            ),
+            Lecture(
+                title = LectureType.BACK_END,
+                presenter = "Park",
+                capacity = 30,
+                date = dateFormat("2025-09-30 13:00"),
+            ),
+        )
+        lectureRepository.saveAll(lectures)
+        repeat(3) {
+            val lectureHistoryDto = LectureHistoryDto(
+                userId = userId,
+                lecture = lectures[it],
+            )
+            lectureEnrollmentService.enroll(lectureHistoryDto)
+        }
+
+        // when
+        val result = lectureEnrollmentService.getUserOfLectureHistory(userId)
+
+        // then
+        assertThat(result).isNotNull()
+        assertThat(result.size).isEqualTo(3)
     }
 
     private fun saveTestLecture(): Lecture {

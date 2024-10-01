@@ -31,4 +31,8 @@ class LectureEnrollmentService(
         val currentEnrollmentCount = lectureEnrollmentRepository.countByLectureId(lectureId)
         return currentEnrollmentCount < 30
     }
+
+    fun getUserOfLectureHistory(userid: Long): List<LectureEnrollmentHistory> {
+        return lectureEnrollmentRepository.findAllByUserId(userid)
+    }
 }

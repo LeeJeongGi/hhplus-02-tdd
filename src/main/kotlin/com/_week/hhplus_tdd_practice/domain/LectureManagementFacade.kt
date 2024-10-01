@@ -1,9 +1,6 @@
 package com._week.hhplus_tdd_practice.domain
 
-import com._week.hhplus_tdd_practice.domain.dto.LectureHistoryDto
-import com._week.hhplus_tdd_practice.domain.dto.LectureHistoryInfo
-import com._week.hhplus_tdd_practice.domain.dto.LectureInfo
-import com._week.hhplus_tdd_practice.domain.dto.UserLectureDto
+import com._week.hhplus_tdd_practice.domain.dto.*
 import org.springframework.stereotype.Service
 import org.springframework.transaction.annotation.Transactional
 import java.time.LocalDateTime
@@ -43,6 +40,13 @@ class LectureManagementFacade(
             lectureEnrollmentService.checkLectureCapacity(lecture.id!!)
         }.map {
             LectureInfo.of(it)
+        }
+    }
+
+    fun getUserOfLectureHistory(userId: Long): List<UserLectureHistoryInfo> {
+        val userLectureHistory = lectureEnrollmentService.getUserOfLectureHistory(userId)
+        return userLectureHistory.map {
+            UserLectureHistoryInfo.of(it)
         }
     }
 }

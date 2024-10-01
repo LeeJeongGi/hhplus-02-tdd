@@ -174,4 +174,59 @@ class LectureManagementFacadeTest {
         assertThat(result).isNotNull
         assertThat(result.size).isEqualTo(0)
     }
+
+    @Test
+    @DisplayName("특정 userId 로 신청 완료된 특강 목록을 조회하는 테스트")
+    fun getUserOfLectureHistoryTest() {
+        // given
+        val userLectureHistory = setTestHistory()
+        `when`(lectureEnrollmentService.getUserOfLectureHistory(1L)).thenReturn(userLectureHistory)
+
+        // when
+        val result = lectureManagementFacade.getUserOfLectureHistory(1L)
+
+        // then
+        assertThat(result).isNotNull
+        assertThat(result.size).isEqualTo(3)
+    }
+
+    private fun setTestHistory() = listOf(
+        LectureEnrollmentHistory(
+            id = 1L,
+            userId = 1L,
+            lecture = Lecture(
+                id = 1L,
+                title = LectureType.Ai,
+                presenter = "Lee",
+                capacity = 30,
+                date = LocalDateTime.parse("2025-09-30 13:00", DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm"))
+            ),
+            creDateAt = LocalDateTime.now()
+        ),
+        LectureEnrollmentHistory(
+            id = 2L,
+            userId = 1L,
+            lecture = Lecture(
+                id = 2L,
+                title = LectureType.FRONT_END,
+                presenter = "Kee",
+                capacity = 30,
+                date = LocalDateTime.parse("2025-10-30 13:00", DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm"))
+            ),
+            creDateAt = LocalDateTime.now()
+        ),
+        LectureEnrollmentHistory(
+            id = 3L,
+            userId = 1L,
+            lecture = Lecture(
+                id = 3L,
+                title = LectureType.BACK_END,
+                presenter = "eee",
+                capacity = 30,
+                date = LocalDateTime.parse("2025-07-30 13:00", DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm"))
+            ),
+            creDateAt = LocalDateTime.now()
+        ),
+    )
+
 }

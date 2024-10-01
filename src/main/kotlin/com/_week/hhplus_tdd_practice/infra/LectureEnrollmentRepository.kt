@@ -10,4 +10,6 @@ interface LectureEnrollmentRepository: JpaRepository<LectureEnrollmentHistory, L
     fun findByUserIdAndLectureId(userId: Long, lectureId: Long): LectureEnrollmentHistory?
 
     fun countByLectureId(lectureId: Long): Long
+
+    fun findAllByUserId(userId: Long): List<LectureEnrollmentHistory>
 }
