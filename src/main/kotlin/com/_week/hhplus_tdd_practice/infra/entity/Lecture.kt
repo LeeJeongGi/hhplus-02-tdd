@@ -1,4 +1,4 @@
-package com._week.hhplus_tdd_practice.domain.entity
+package com._week.hhplus_tdd_practice.infra.entity
 
 import jakarta.persistence.*
 import java.time.LocalDateTime

@@ -2,7 +2,7 @@ package com._week.hhplus_tdd_practice.domain
 
 import com._week.hhplus_tdd_practice.domain.dto.LectureHistoryDto
 import com._week.hhplus_tdd_practice.domain.dto.UserLectureDto
-import com._week.hhplus_tdd_practice.domain.entity.LectureEnrollmentHistory
+import com._week.hhplus_tdd_practice.infra.entity.LectureEnrollmentHistory
 import com._week.hhplus_tdd_practice.infra.LectureEnrollmentRepository
 import org.springframework.stereotype.Service
 import java.time.LocalDateTime

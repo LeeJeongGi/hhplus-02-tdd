@@ -2,9 +2,9 @@ package com._week.hhplus_tdd_practice.domain
 
 import com._week.hhplus_tdd_practice.domain.dto.LectureHistoryDto
 import com._week.hhplus_tdd_practice.domain.dto.UserLectureDto
-import com._week.hhplus_tdd_practice.domain.entity.Lecture
-import com._week.hhplus_tdd_practice.domain.entity.LectureEnrollmentHistory
-import com._week.hhplus_tdd_practice.domain.entity.LectureType
+import com._week.hhplus_tdd_practice.infra.entity.Lecture
+import com._week.hhplus_tdd_practice.infra.entity.LectureEnrollmentHistory
+import com._week.hhplus_tdd_practice.infra.entity.LectureType
 import org.assertj.core.api.AssertionsForInterfaceTypes.assertThat
 import org.junit.jupiter.api.Assertions.assertNotNull
 import org.junit.jupiter.api.DisplayName

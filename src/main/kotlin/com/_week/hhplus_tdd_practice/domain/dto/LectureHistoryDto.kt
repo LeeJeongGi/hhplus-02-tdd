@@ -1,6 +1,6 @@
 package com._week.hhplus_tdd_practice.domain.dto
 
-import com._week.hhplus_tdd_practice.domain.entity.Lecture
+import com._week.hhplus_tdd_practice.infra.entity.Lecture
 
 data class LectureHistoryDto(
     val lecture: Lecture,

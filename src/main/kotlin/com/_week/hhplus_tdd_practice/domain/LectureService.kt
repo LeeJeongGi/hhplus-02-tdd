@@ -1,6 +1,6 @@
 package com._week.hhplus_tdd_practice.domain
 
-import com._week.hhplus_tdd_practice.domain.entity.Lecture
+import com._week.hhplus_tdd_practice.infra.entity.Lecture
 import com._week.hhplus_tdd_practice.infra.LectureRepository
 import org.springframework.stereotype.Service
 

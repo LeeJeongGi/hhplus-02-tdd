@@ -1,7 +1,7 @@
 package com._week.hhplus_tdd_practice.domain
 
-import com._week.hhplus_tdd_practice.domain.entity.Lecture
-import com._week.hhplus_tdd_practice.domain.entity.LectureType
+import com._week.hhplus_tdd_practice.infra.entity.Lecture
+import com._week.hhplus_tdd_practice.infra.entity.LectureType
 import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.DisplayName
 import org.junit.jupiter.api.assertThrows

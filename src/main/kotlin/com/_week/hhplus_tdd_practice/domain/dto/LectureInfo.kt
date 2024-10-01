@@ -1,7 +1,7 @@
 package com._week.hhplus_tdd_practice.domain.dto
 
-import com._week.hhplus_tdd_practice.domain.entity.Lecture
-import com._week.hhplus_tdd_practice.domain.entity.LectureType
+import com._week.hhplus_tdd_practice.infra.entity.Lecture
+import com._week.hhplus_tdd_practice.infra.entity.LectureType
 
 data class LectureInfo(
     val userId: Long,

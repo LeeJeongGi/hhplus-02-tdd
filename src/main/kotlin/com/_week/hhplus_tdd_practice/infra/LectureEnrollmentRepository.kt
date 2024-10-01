@@ -1,6 +1,6 @@
 package com._week.hhplus_tdd_practice.infra
 
-import com._week.hhplus_tdd_practice.domain.entity.LectureEnrollmentHistory
+import com._week.hhplus_tdd_practice.infra.entity.LectureEnrollmentHistory
 import org.springframework.data.jpa.repository.JpaRepository
 import org.springframework.stereotype.Repository
 
