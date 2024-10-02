@@ -17,14 +17,14 @@ data class Lecture(
     @Column(nullable = false)
     val presenter: String,
 
-    @Column(nullable = false)
-    val capacity: Int = 30,
-
-    @Column(nullable = false)
-    val date: LocalDateTime,
-
     @OneToMany(mappedBy = "lecture", cascade = [CascadeType.ALL], fetch = FetchType.LAZY)
     val registrationHistory: List<LectureEnrollmentHistory> = mutableListOf(),
+
+    @OneToMany(mappedBy = "lecture", cascade = [CascadeType.ALL], fetch = FetchType.LAZY)
+    val schedules: List<LectureSchedule> = mutableListOf(),
+
+    @Column(nullable = false)
+    val creDateAt: LocalDateTime = LocalDateTime.now()
 )
 
 enum class LectureType(val displayName: String) {

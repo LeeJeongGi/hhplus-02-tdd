@@ -4,6 +4,7 @@ import com._week.hhplus_tdd_practice.domain.dto.LectureHistoryDto
 import com._week.hhplus_tdd_practice.domain.dto.UserLectureDto
 import com._week.hhplus_tdd_practice.infra.entity.Lecture
 import com._week.hhplus_tdd_practice.infra.entity.LectureEnrollmentHistory
+import com._week.hhplus_tdd_practice.infra.entity.LectureSchedule
 import com._week.hhplus_tdd_practice.infra.entity.LectureType
 import org.assertj.core.api.AssertionsForInterfaceTypes.assertThat
 import org.junit.jupiter.api.Assertions.assertNotNull
@@ -40,8 +41,7 @@ class LectureManagementFacadeTest {
             id = 1L,
             title = LectureType.Ai,
             presenter = "Ms.Lee",
-            capacity = 30,
-            date = LocalDateTime.parse("2024-09-01 13:00", DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm"))
+            creDateAt = LocalDateTime.now(),
         )
 
         val request = UserLectureDto(lecture.id!!, userId)
@@ -64,8 +64,7 @@ class LectureManagementFacadeTest {
             id = 1L,
             title = LectureType.Ai,
             presenter = "Ms.Lee",
-            capacity = 30,
-            date = LocalDateTime.parse("2024-09-01 13:00", DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm"))
+            creDateAt = LocalDateTime.now(),
         )
 
         val request = UserLectureDto(lecture.id!!, userId)
@@ -87,16 +86,14 @@ class LectureManagementFacadeTest {
     fun enrollSuccess() {
         // given
         val userId = 1L
+
         val lecture = Lecture(
             id = 1L,
             title = LectureType.Ai,
             presenter = "Ms.Lee",
-            capacity = 30,
-            date = LocalDateTime.parse("2024-09-01 13:00", DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm"))
         )
 
         val request = UserLectureDto(lecture.id!!, userId)
-
         `when`(lectureEnrollmentService.checkUserEnrollment(request)).thenReturn(true)
         `when`(lectureService.findLecture(request.lectureId)).thenReturn(lecture)
         `when`(lectureEnrollmentService.checkLectureCapacity(lecture.id!!)).thenReturn(true)
@@ -129,22 +126,19 @@ class LectureManagementFacadeTest {
                 id = 1L,
                 title = LectureType.Ai,
                 presenter = "Lee",
-                capacity = 30,
-                date = LocalDateTime.parse("2024-10-02 13:00", DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm")),
+                creDateAt = LocalDateTime.now(),
             ),
             Lecture(
                 id = 2L,
                 title = LectureType.FRONT_END,
                 presenter = "Kim",
-                capacity = 30,
-                date = LocalDateTime.parse("2024-10-03 13:00", DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm")),
+                creDateAt = LocalDateTime.now(),
             ),
             Lecture(
                 id = 3L,
                 title = LectureType.BACK_END,
                 presenter = "Park",
-                capacity = 30,
-                date = LocalDateTime.parse("2024-10-04 13:00", DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm")),
+                creDateAt = LocalDateTime.now(),
             ),
         )
 
@@ -198,8 +192,7 @@ class LectureManagementFacadeTest {
                 id = 1L,
                 title = LectureType.Ai,
                 presenter = "Lee",
-                capacity = 30,
-                date = LocalDateTime.parse("2025-09-30 13:00", DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm"))
+                creDateAt = LocalDateTime.now(),
             ),
             creDateAt = LocalDateTime.now()
         ),
@@ -210,8 +203,7 @@ class LectureManagementFacadeTest {
                 id = 2L,
                 title = LectureType.FRONT_END,
                 presenter = "Kee",
-                capacity = 30,
-                date = LocalDateTime.parse("2025-10-30 13:00", DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm"))
+                creDateAt = LocalDateTime.now(),
             ),
             creDateAt = LocalDateTime.now()
         ),
@@ -222,8 +214,7 @@ class LectureManagementFacadeTest {
                 id = 3L,
                 title = LectureType.BACK_END,
                 presenter = "eee",
-                capacity = 30,
-                date = LocalDateTime.parse("2025-07-30 13:00", DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm"))
+                creDateAt = LocalDateTime.now(),
             ),
             creDateAt = LocalDateTime.now()
         ),

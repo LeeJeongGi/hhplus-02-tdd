@@ -2,15 +2,15 @@ package com._week.hhplus_tdd_practice.domain
 
 import com._week.hhplus_tdd_practice.domain.dto.LectureHistoryDto
 import com._week.hhplus_tdd_practice.domain.dto.UserLectureDto
-import com._week.hhplus_tdd_practice.infra.LectureEnrollmentRepository
-import com._week.hhplus_tdd_practice.infra.entity.Lecture
-import com._week.hhplus_tdd_practice.infra.entity.LectureType
 import com._week.hhplus_tdd_practice.infra.LectureRepository
+import com._week.hhplus_tdd_practice.infra.LectureScheduleRepository
+import com._week.hhplus_tdd_practice.infra.entity.Lecture
+import com._week.hhplus_tdd_practice.infra.entity.LectureSchedule
+import com._week.hhplus_tdd_practice.infra.entity.LectureType
 import org.assertj.core.api.AssertionsForInterfaceTypes.assertThat
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.DisplayName
 import org.junit.jupiter.api.assertDoesNotThrow
-import org.junit.jupiter.api.assertThrows
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.boot.test.context.SpringBootTest
 import java.time.LocalDateTime
@@ -25,6 +25,9 @@ class LectureEnrollmentServiceTest {
 
     @Autowired
     private lateinit var lectureRepository: LectureRepository
+
+    @Autowired
+    private lateinit var lectureScheduleRepository: LectureScheduleRepository
 
     @BeforeEach
     fun clear() {
@@ -112,8 +115,6 @@ class LectureEnrollmentServiceTest {
         assertThat(lectureEnrollmentHistory.lecture.id).isEqualTo(saveLecture.id)
         assertThat(lectureEnrollmentHistory.lecture.title).isEqualTo(saveLecture.title)
         assertThat(lectureEnrollmentHistory.lecture.presenter).isEqualTo(saveLecture.presenter)
-        assertThat(lectureEnrollmentHistory.lecture.capacity).isEqualTo(30L)
-
     }
 
     @Test
@@ -125,23 +126,31 @@ class LectureEnrollmentServiceTest {
             Lecture(
                 title = LectureType.Ai,
                 presenter = "Lee",
-                capacity = 30,
-                date = dateFormat("2025-09-30 13:00"),
+                creDateAt = LocalDateTime.now(),
             ),
             Lecture(
                 title = LectureType.FRONT_END,
                 presenter = "Kim",
-                capacity = 30,
-                date = dateFormat("2025-09-30 13:00"),
+                creDateAt = LocalDateTime.now(),
             ),
             Lecture(
                 title = LectureType.BACK_END,
                 presenter = "Park",
-                capacity = 30,
-                date = dateFormat("2025-09-30 13:00"),
+                creDateAt = LocalDateTime.now(),
             ),
         )
-        lectureRepository.saveAll(lectures)
+
+        val saveLectures = lectureRepository.saveAll(lectures)
+        saveLectures.forEach {
+            val lectureSchedule = LectureSchedule(
+                lecture = it,
+                date = dateFormat("2024-09-30 13:00"),
+                capacity = 30,
+                creDateAt = LocalDateTime.now(),
+            )
+            lectureScheduleRepository.save(lectureSchedule)
+        }
+
         repeat(3) {
             val lectureHistoryDto = LectureHistoryDto(
                 userId = userId,
@@ -156,17 +165,28 @@ class LectureEnrollmentServiceTest {
         // then
         assertThat(result).isNotNull()
         assertThat(result.size).isEqualTo(3)
+        assertThat(result[0].lecture.schedules[0].capacity).isEqualTo(30)
+        assertThat(result[1].lecture.schedules[0].capacity).isEqualTo(30)
+        assertThat(result[2].lecture.schedules[0].capacity).isEqualTo(30)
     }
 
     private fun saveTestLecture(): Lecture {
         val pre_lecture = Lecture(
             title = LectureType.FRONT_END,
             presenter = "Lee",
-            capacity = 30,
-            date = dateFormat("2024-09-30 13:00"),
         )
 
-        return lectureRepository.save(pre_lecture)
+        val saveLecture = lectureRepository.save(pre_lecture)
+
+        val lectureSchedule = LectureSchedule(
+            lecture = saveLecture,
+            date = dateFormat("2024-09-30 13:00"),
+            capacity = 30,
+            creDateAt = LocalDateTime.now(),
+        )
+        lectureScheduleRepository.save(lectureSchedule)
+
+        return saveLecture
     }
 
     private fun dateFormat(dateString: String): LocalDateTime {

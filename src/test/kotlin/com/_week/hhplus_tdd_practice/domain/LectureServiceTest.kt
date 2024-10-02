@@ -1,7 +1,9 @@
 package com._week.hhplus_tdd_practice.domain
 
 import com._week.hhplus_tdd_practice.infra.LectureRepository
+import com._week.hhplus_tdd_practice.infra.LectureScheduleRepository
 import com._week.hhplus_tdd_practice.infra.entity.Lecture
+import com._week.hhplus_tdd_practice.infra.entity.LectureSchedule
 import com._week.hhplus_tdd_practice.infra.entity.LectureType
 import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.BeforeEach
@@ -10,6 +12,7 @@ import org.junit.jupiter.api.assertThrows
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.boot.test.context.SpringBootTest
 import java.time.LocalDateTime
+import java.time.format.DateTimeFormatter
 import kotlin.test.Test
 
 @SpringBootTest
@@ -20,6 +23,9 @@ class LectureServiceTest {
 
     @Autowired
     private lateinit var lectureRepository: LectureRepository
+
+    @Autowired
+    private lateinit var lectureScheduleRepository: LectureScheduleRepository
 
     @BeforeEach
     fun setUp() {
@@ -47,8 +53,7 @@ class LectureServiceTest {
         val lecture =  Lecture(
             title = LectureType.FRONT_END,
             presenter = "lee",
-            capacity = 30,
-            date = LocalDateTime.now()
+            creDateAt = LocalDateTime.now(),
         )
 
         // when
@@ -57,8 +62,6 @@ class LectureServiceTest {
         // then
         assertThat(createLecture.title).isEqualTo(lecture.title)
         assertThat(createLecture.presenter).isEqualTo(lecture.presenter)
-        assertThat(createLecture.capacity).isEqualTo(lecture.capacity)
-        assertThat(createLecture.date).isEqualTo(lecture.date)
     }
 
     @Test
@@ -72,7 +75,8 @@ class LectureServiceTest {
         val lectures = lectureService.getUpcomingLecture(now)
 
         // Then
-        assertThat(lectures.size).isEqualTo(3)
+        assertThat(lectures.size).isEqualTo(5)
+        assertThat(lectures[0].schedules.size).isEqualTo(3)
     }
 
     @Test
@@ -99,11 +103,22 @@ class LectureServiceTest {
             val lecture = Lecture(
                 title = LectureType.FRONT_END,
                 presenter = "lee",
-                capacity = 30,
-                date = date
+                creDateAt = LocalDateTime.now(),
             )
 
-            lectureService.create(lecture)
+            val saveLecture = lectureService.create(lecture)
+            (0 .. 2).forEach{ hour ->
+                val scheduleTime = LocalDateTime.parse("2024-11-01 13:00", DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm"))
+                    .plusHours(hour.toLong())
+
+                val lectureSchedule = LectureSchedule(
+                    lecture = saveLecture,
+                    date = scheduleTime,
+                    creDateAt = LocalDateTime.now(),
+                )
+                lectureScheduleRepository.save(lectureSchedule)
+            }
+
         }
     }
 }
