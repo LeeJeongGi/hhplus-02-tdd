@@ -3,8 +3,8 @@ package com._week.hhplus_tdd_practice.domain
 import com._week.hhplus_tdd_practice.domain.dto.LectureHistoryDto
 import com._week.hhplus_tdd_practice.domain.dto.UserLectureDto
 import com._week.hhplus_tdd_practice.infra.entity.Lecture
+import com._week.hhplus_tdd_practice.infra.entity.LectureApplier
 import com._week.hhplus_tdd_practice.infra.entity.LectureEnrollmentHistory
-import com._week.hhplus_tdd_practice.infra.entity.LectureSchedule
 import com._week.hhplus_tdd_practice.infra.entity.LectureType
 import org.assertj.core.api.AssertionsForInterfaceTypes.assertThat
 import org.junit.jupiter.api.Assertions.assertNotNull
@@ -16,7 +16,6 @@ import org.mockito.Mock
 import org.mockito.Mockito.`when`
 import org.mockito.junit.jupiter.MockitoExtension
 import java.time.LocalDateTime
-import java.time.format.DateTimeFormatter
 import java.time.temporal.ChronoUnit
 import kotlin.test.Test
 
@@ -28,6 +27,9 @@ class LectureManagementFacadeTest {
 
     @Mock
     private lateinit var lectureEnrollmentService: LectureEnrollmentService
+
+    @Mock
+    private lateinit var lectureApplierService: LectureApplierService
 
     @InjectMocks
     private lateinit var lectureManagementFacade: LectureManagementFacade
@@ -44,7 +46,13 @@ class LectureManagementFacadeTest {
             creDateAt = LocalDateTime.now(),
         )
 
+        val lectureApplier = LectureApplier(
+            lectureId = lecture.id!!,
+            currentEnrollmentCount = 0
+        )
+
         val request = UserLectureDto(lecture.id!!, userId)
+        `when`(lectureApplierService.getLectureCapacity(lecture.id!!)).thenReturn(lectureApplier)
         `when`(lectureEnrollmentService.checkUserEnrollment(request)).thenReturn(false)
 
         // when & then
@@ -68,10 +76,11 @@ class LectureManagementFacadeTest {
         )
 
         val request = UserLectureDto(lecture.id!!, userId)
-
-        `when`(lectureEnrollmentService.checkUserEnrollment(request)).thenReturn(true)
-        `when`(lectureService.findLecture(request.lectureId)).thenReturn(lecture)
-        `when`(lectureEnrollmentService.checkLectureCapacity(lecture.id!!)).thenReturn(false)
+        val lectureApplier = LectureApplier(
+            lectureId = lecture.id!!,
+            currentEnrollmentCount = 30
+        )
+        `when`(lectureApplierService.getLectureCapacity(lecture.id!!)).thenReturn(lectureApplier)
 
         // when & then
         val message = assertThrows<IllegalArgumentException> {
@@ -94,9 +103,13 @@ class LectureManagementFacadeTest {
         )
 
         val request = UserLectureDto(lecture.id!!, userId)
+        val lectureApplier = LectureApplier(
+            lectureId = lecture.id!!,
+            currentEnrollmentCount = 29
+        )
+        `when`(lectureApplierService.getLectureCapacity(lecture.id!!)).thenReturn(lectureApplier)
         `when`(lectureEnrollmentService.checkUserEnrollment(request)).thenReturn(true)
         `when`(lectureService.findLecture(request.lectureId)).thenReturn(lecture)
-        `when`(lectureEnrollmentService.checkLectureCapacity(lecture.id!!)).thenReturn(true)
         `when`(lectureEnrollmentService.enroll(LectureHistoryDto.of(lecture, userId))).thenReturn(
             LectureEnrollmentHistory(
                 id = 1L,
@@ -105,6 +118,7 @@ class LectureManagementFacadeTest {
                 creDateAt = LocalDateTime.now()
             )
         )
+        `when`(lectureApplierService.incrementEnrollmentCount(lecture.id!!)).thenReturn(1L)
 
         // when
         val result = lectureManagementFacade.enroll(request)
