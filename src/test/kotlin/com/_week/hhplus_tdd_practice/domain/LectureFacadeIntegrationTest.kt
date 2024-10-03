@@ -14,7 +14,6 @@ import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.DisplayName
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.boot.test.context.SpringBootTest
-import org.springframework.transaction.annotation.Transactional
 import java.time.LocalDateTime
 import java.time.format.DateTimeFormatter
 import java.util.concurrent.CountDownLatch
@@ -42,6 +41,8 @@ class LectureFacadeIntegrationTest {
 
     @BeforeEach
     fun setUp() {
+        lectureApplierRepository.deleteAll()
+        lectureEnrollmentRepository.deleteAll()
         lectureScheduleRepository.deleteAll()
         lectureRepository.deleteAll()
     }
@@ -65,11 +66,11 @@ class LectureFacadeIntegrationTest {
         )
         lectureScheduleRepository.save(lectureSchedule)
 
-        val tt = LectureApplier(
+        val lectureApplier = LectureApplier(
             lectureId = saveLecture.id!!,
             currentEnrollmentCount = 0
         )
-        lectureApplierRepository.save(tt)
+        lectureApplierRepository.save(lectureApplier)
 
         val executor = Executors.newFixedThreadPool(40)
         val lectureLatch = CountDownLatch(40)
@@ -94,7 +95,7 @@ class LectureFacadeIntegrationTest {
             }
             lectureLatch.await()
 
-            val result = lectureApplierRepository.getCurrentEnrollmentCountByLectureId(1L)
+            val result = lectureApplierRepository.getCurrentEnrollmentCountByLectureId(saveLecture.id!!) ?: 0
 
             assertThat(cnt.get()).isEqualTo(30)
             assertThat(result).isEqualTo(30)
@@ -123,11 +124,11 @@ class LectureFacadeIntegrationTest {
         )
         lectureScheduleRepository.save(lectureSchedule)
 
-        val tt = LectureApplier(
+        val lectureApplier = LectureApplier(
             lectureId = saveLecture.id!!,
             currentEnrollmentCount = 0
         )
-        lectureApplierRepository.save(tt)
+        lectureApplierRepository.save(lectureApplier)
 
         val executor = Executors.newFixedThreadPool(5)
         val lectureLatch = CountDownLatch(5)
@@ -151,11 +152,16 @@ class LectureFacadeIntegrationTest {
                 }
             }
             lectureLatch.await()
-            val result = lectureEnrollmentRepository.findByUserIdAndLectureId(1L,1L)
+            val result = lectureEnrollmentRepository.findByUserIdAndLectureId(1L, saveLecture.id!!)
 
             assertThat(cnt.get()).isEqualTo(1)
-            assertThat(result!!.lecture.id).isEqualTo(1L)
-            assertThat(result.userId).isEqualTo(1L)
+            assertThat(result).isNotNull
+
+            result?.let {
+                assertThat(result.lecture.id).isEqualTo(saveLecture.id!!)
+                assertThat(result.userId).isEqualTo(1L)
+            }
+
         } finally {
             executor.shutdown()
         }
