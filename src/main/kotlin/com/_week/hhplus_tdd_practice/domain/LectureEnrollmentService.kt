@@ -26,7 +26,6 @@ class LectureEnrollmentService(
 
     @Transactional(readOnly = true)
     fun checkUserEnrollment(userLectureDto: UserLectureDto): Boolean {
-        println("checkUserEnrollment called for user: ${userLectureDto.userId}")
         val enrollment = lectureEnrollmentRepository.findByUserIdAndLectureId(userLectureDto.userId, userLectureDto.lectureId)
         return enrollment == null
     }
@@ -34,7 +33,6 @@ class LectureEnrollmentService(
     @Transactional(readOnly = true)
     fun checkLectureCapacity(lectureId: Long): Boolean {
         val currentEnrollmentCount = lectureEnrollmentRepository.countByLectureId(lectureId)
-        println("checkLectureCapacity called for lecture: $currentEnrollmentCount")
         return currentEnrollmentCount < 30
     }
 
