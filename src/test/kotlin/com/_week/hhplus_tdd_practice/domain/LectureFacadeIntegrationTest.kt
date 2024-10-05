@@ -2,6 +2,7 @@ package com._week.hhplus_tdd_practice.domain
 
 import com._week.hhplus_tdd_practice.domain.dto.UserLectureDto
 import com._week.hhplus_tdd_practice.infra.LectureApplierRepository
+import com._week.hhplus_tdd_practice.infra.LectureEnrollmentRepository
 import com._week.hhplus_tdd_practice.infra.LectureRepository
 import com._week.hhplus_tdd_practice.infra.LectureScheduleRepository
 import com._week.hhplus_tdd_practice.infra.entity.Lecture
@@ -33,10 +34,15 @@ class LectureFacadeIntegrationTest {
     private lateinit var lectureScheduleRepository: LectureScheduleRepository
 
     @Autowired
+    private lateinit var lectureEnrollmentRepository: LectureEnrollmentRepository
+
+    @Autowired
     private lateinit var lectureApplierRepository: LectureApplierRepository
 
     @BeforeEach
     fun setUp() {
+        lectureApplierRepository.deleteAll()
+        lectureEnrollmentRepository.deleteAll()
         lectureScheduleRepository.deleteAll()
         lectureRepository.deleteAll()
     }
@@ -60,11 +66,11 @@ class LectureFacadeIntegrationTest {
         )
         lectureScheduleRepository.save(lectureSchedule)
 
-        val tt = LectureApplier(
+        val lectureApplier = LectureApplier(
             lectureId = saveLecture.id!!,
             currentEnrollmentCount = 0
         )
-        lectureApplierRepository.save(tt)
+        lectureApplierRepository.save(lectureApplier)
 
         val executor = Executors.newFixedThreadPool(40)
         val lectureLatch = CountDownLatch(40)
@@ -82,17 +88,80 @@ class LectureFacadeIntegrationTest {
 
                         val enroll = lectureManagementFacade.enroll(userLectureDto)
                         cnt.incrementAndGet()
-
-                        val result = lectureApplierRepository.findByLectureIdWithLock(1L)
-
-                        assertThat(cnt.get()).isEqualTo(30)
-                        assertThat(result).isEqualTo(30)
                     } finally {
                         lectureLatch.countDown()
                     }
                 }
             }
             lectureLatch.await()
+
+            val result = lectureApplierRepository.getCurrentEnrollmentCountByLectureId(saveLecture.id!!) ?: 0
+
+            assertThat(cnt.get()).isEqualTo(30)
+            assertThat(result).isEqualTo(30)
+        } finally {
+            executor.shutdown()
+        }
+
+    }
+
+    @Test
+    @DisplayName("동일한 유저 정보로 같은 특강을 5번 신청했을 때, 1번만 성공하는 것을 검증하는 통합 테스트 작성")
+    fun mustOnePassSameUser() {
+        // given
+        val lecture = Lecture(
+            title = LectureType.BACK_END,
+            presenter = "Lee",
+            creDateAt = LocalDateTime.now(),
+        )
+        val saveLecture = lectureRepository.save(lecture)
+
+        val lectureSchedule = LectureSchedule(
+            lecture = saveLecture,
+            capacity = 30,
+            date = LocalDateTime.parse("2024-11-01 13:00", DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm")),
+            creDateAt = LocalDateTime.now(),
+        )
+        lectureScheduleRepository.save(lectureSchedule)
+
+        val lectureApplier = LectureApplier(
+            lectureId = saveLecture.id!!,
+            currentEnrollmentCount = 0
+        )
+        lectureApplierRepository.save(lectureApplier)
+
+        val executor = Executors.newFixedThreadPool(5)
+        val lectureLatch = CountDownLatch(5)
+        val cnt = AtomicInteger(0)
+
+        // when && then
+        try {
+            repeat(5) {
+                executor.submit {
+                    try {
+                        val userLectureDto = UserLectureDto(
+                            lectureId = saveLecture.id!!,
+                            userId = 1L
+                        )
+
+                        val enroll = lectureManagementFacade.enroll(userLectureDto)
+                        cnt.incrementAndGet()
+                    } finally {
+                        lectureLatch.countDown()
+                    }
+                }
+            }
+            lectureLatch.await()
+            val result = lectureEnrollmentRepository.findByUserIdAndLectureId(1L, saveLecture.id!!)
+
+            assertThat(cnt.get()).isEqualTo(1)
+            assertThat(result).isNotNull
+
+            result?.let {
+                assertThat(result.lecture.id).isEqualTo(saveLecture.id!!)
+                assertThat(result.userId).isEqualTo(1L)
+            }
+
         } finally {
             executor.shutdown()
         }

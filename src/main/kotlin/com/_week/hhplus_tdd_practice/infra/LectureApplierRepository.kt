@@ -14,4 +14,7 @@ interface LectureApplierRepository : JpaRepository<LectureApplier, Long> {
     @Lock(LockModeType.PESSIMISTIC_WRITE)
     @Query("SELECT la FROM LectureApplier la WHERE la.lectureId = :lectureId")
     fun findByLectureIdWithLock(@Param("lectureId") lectureId: Long): LectureApplier?
+
+    @Query("SELECT la.currentEnrollmentCount FROM LectureApplier la WHERE la.lectureId = :lectureId")
+    fun getCurrentEnrollmentCountByLectureId(@Param("lectureId") lectureId: Long): Int?
 }
