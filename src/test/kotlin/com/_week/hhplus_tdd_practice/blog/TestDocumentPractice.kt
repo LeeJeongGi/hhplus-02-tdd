@@ -51,6 +51,7 @@ class TestDocumentPractice {
 
         // then
         assertEquals(-5, user.getScore()) // 마감 기한 초과 시 5점 차감
+
     }
 
     @Test
